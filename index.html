@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Natta</title>
+<meta name="theme-color" content="#101326">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Natta">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#101326;
+    --night-2:#171B33;
+    --card:#1C2140;
+    --line:#2A2F52;
+    --ink:#EDEFFA;
+    --ink-dim:#AEB4D9;
+    --moon:#F5C97B;
+    --moon-glow:rgba(245,201,123,.28);
+    --rose:#E88AA0;
+    --radius:22px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--night);
+    color:var(--ink);
+    font-family:'Nunito Sans',system-ui,sans-serif;
+    display:flex;flex-direction:column;align-items:center;
+    padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
+    overflow-x:hidden;
+    background:radial-gradient(120% 90% at 50% -10%, #1A1F3E 0%, var(--night) 60%);
+  }
+  /* stars */
+  #sky{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .star{position:absolute;border-radius:50%;background:var(--ink-dim);opacity:.35}
+  body.sleeping .star{animation:twinkle 4s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.7}}
+
+  header{z-index:1;text-align:center;margin-top:12px}
+  h1{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.35rem;letter-spacing:.02em;color:var(--ink-dim)}
+  #status-word{
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:2rem;margin-top:2px;
+    transition:color .4s;
+  }
+  body.sleeping #status-word{color:var(--moon)}
+
+  main{z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:420px}
+
+  /* the moon button */
+  #moon{
+    width:min(62vw,240px);height:min(62vw,240px);
+    border-radius:50%;border:none;cursor:pointer;position:relative;
+    background:radial-gradient(circle at 38% 34%, #FBE3AE 0%, var(--moon) 55%, #D9A85C 100%);
+    box-shadow:0 0 60px var(--moon-glow), 0 0 0 10px rgba(245,201,123,.06);
+    transition:transform .15s ease, box-shadow .6s ease;
+  }
+  #moon:active{transform:scale(.96)}
+  #moon:focus-visible{outline:3px solid var(--ink);outline-offset:6px}
+  /* crescent shadow, hidden when awake */
+  #moon::after{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle at 72% 40%, var(--night) 0 46%, transparent 47%);
+    opacity:0;transition:opacity .8s ease;
+  }
+  body.sleeping #moon::after{opacity:.92}
+  body.sleeping #moon{animation:breathe 5s ease-in-out infinite}
+  @keyframes breathe{
+    0%,100%{box-shadow:0 0 40px var(--moon-glow),0 0 0 10px rgba(245,201,123,.05)}
+    50%{box-shadow:0 0 90px var(--moon-glow),0 0 0 16px rgba(245,201,123,.10)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    body.sleeping #moon,.star{animation:none !important}
+  }
+  /* sleeping face */
+  .zz{position:absolute;font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--night);opacity:0;transition:opacity .8s}
+  body.sleeping .zz{opacity:.85}
+  .zz1{font-size:1.6rem;left:26%;top:34%}
+  .zz2{font-size:1.05rem;left:40%;top:22%}
+
+  #timer{
+    margin-top:26px;font-family:'Baloo 2',sans-serif;font-weight:500;
+    font-size:3.4rem;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+    color:var(--ink);min-height:1.2em;
+  }
+  #hint{color:var(--ink-dim);font-size:.95rem;margin-top:4px;min-height:1.4em;text-align:center}
+  body.sleeping #hint{color:var(--moon)}
+
+  /* history */
+  section{z-index:1;width:100%;max-width:420px;margin-top:28px}
+  h2{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink-dim);margin-bottom:10px}
+  ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+  li{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 16px;display:flex;justify-content:space-between;align-items:baseline;
+  }
+  li .when{font-size:.95rem;color:var(--ink-dim)}
+  li .dur{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.1rem;font-variant-numeric:tabular-nums}
+  #empty{color:var(--ink-dim);font-size:.95rem;padding:6px 2px}
+  #toast{
+    position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 18px;
+    font-size:.95rem;transition:transform .3s ease;z-index:5;max-width:90vw;text-align:center;
+  }
+  #toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="sky" aria-hidden="true"></div>
+
+<header>
+  <h1>Natta</h1>
+  <div id="status-word" role="status">Vaken</div>
+</header>
+
+<main>
+  <button id="moon" aria-label="Starta eller stoppa sömn">
+    <span class="zz zz1" aria-hidden="true">z</span>
+    <span class="zz zz2" aria-hidden="true">z</span>
+  </button>
+  <div id="timer" aria-live="off"></div>
+  <div id="hint">Tryck på månen när sömnen börjar</div>
+</main>
+
+<section>
+  <h2>Senaste sömn</h2>
+  <ul id="history"></ul>
+  <div id="empty" hidden>Inga loggade sömnpass ännu.</div>
+</section>
+
+<div id="toast" role="status"></div>
+
+<script>
+/* ============ KONFIG ============ */
+/* Klistra in din Apps Script Web App-URL här (slutar på /exec) */
+const API = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+/* ================================ */
+
+const $ = id => document.getElementById(id);
+let startTime = null;   // Date | null — sanningen kommer från backend
+let tick = null;
+
+/* safe localStorage (fungerar även där storage är blockerat) */
+const store = {
+  get(k){ try{return localStorage.getItem(k)}catch(e){return null} },
+  set(k,v){ try{localStorage.setItem(k,v)}catch(e){} },
+  del(k){ try{localStorage.removeItem(k)}catch(e){} }
+};
+
+function fmt(ms){
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  return (h>0? h+":" : "") + String(m).padStart(h>0?2:1,"0") + ":" + String(sec).padStart(2,"0");
+}
+function fmtDur(min){
+  const h = Math.floor(min/60), m = Math.round(min%60);
+  return h>0 ? `${h} h ${m} min` : `${m} min`;
+}
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+function render(){
+  const sleeping = !!startTime;
+  document.body.classList.toggle("sleeping", sleeping);
+  $("status-word").textContent = sleeping ? "Sover" : "Vaken";
+  $("hint").textContent = sleeping ? "Tryck på månen när hen vaknar" : "Tryck på månen när sömnen börjar";
+  clearInterval(tick);
+  if (sleeping){
+    const update = ()=> $("timer").textContent = fmt(Date.now() - startTime.getTime());
+    update(); tick = setInterval(update, 1000);
+  } else {
+    $("timer").textContent = "";
+  }
+}
+
+async function api(action, extra=""){
+  const res = await fetch(`${API}?action=${action}${extra}`, {method:"GET"});
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  return res.json();
+}
+
+async function refreshStatus(){
+  try{
+    const s = await api("status");
+    startTime = s.start ? new Date(s.start) : null;
+    if(startTime) store.set("start", s.start); else store.del("start");
+  }catch(e){
+    /* offline? använd senast kända lokala läge */
+    const cached = store.get("start");
+    startTime = cached ? new Date(cached) : null;
+  }
+  render();
+}
+
+async function refreshHistory(){
+  try{
+    const rows = await api("history", "&limit=7");
+    const ul = $("history"); ul.innerHTML = "";
+    $("empty").hidden = rows.length > 0;
+    for(const r of rows){
+      const d = new Date(r.start);
+      const li = document.createElement("li");
+      const when = document.createElement("span");
+      when.className = "when";
+      when.textContent = d.toLocaleDateString("sv-SE",{weekday:"short", day:"numeric", month:"short"}) +
+        " " + d.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+      const dur = document.createElement("span");
+      dur.className = "dur";
+      dur.textContent = fmtDur(r.minutes);
+      li.append(when, dur); ul.appendChild(li);
+    }
+  }catch(e){ /* historik är inte kritisk */ }
+}
+
+$("moon").addEventListener("click", async ()=>{
+  const wasSleeping = !!startTime;
+  /* optimistisk uppdatering — appen ska kännas omedelbar kl 03 */
+  if(wasSleeping){
+    const slept = Date.now() - startTime.getTime();
+    startTime = null; store.del("start"); render();
+    toast("Sov " + fmt(slept));
+  } else {
+    startTime = new Date(); store.set("start", startTime.toISOString()); render();
+  }
+  try{
+    await api(wasSleeping ? "stop" : "start");
+    if(wasSleeping) refreshHistory();
+  }catch(e){
+    toast("Kunde inte nå backend – kontrollera anslutningen");
+    refreshStatus();
+  }
+});
+
+/* stjärnhimmel */
+(function stars(){
+  const sky = $("sky");
+  for(let i=0;i<40;i++){
+    const s = document.createElement("div");
+    s.className = "star";
+    const size = Math.random()*2 + 1;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s`;
+    sky.appendChild(s);
+  }
+})();
+
+/* uppdatera när appen öppnas igen (t.ex. andra föräldern stoppade) */
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshStatus(); });
+
+if(API.startsWith("PASTE")){
+  $("hint").textContent = "Klistra in din Apps Script-URL i index.html först";
+} else {
+  refreshStatus(); refreshHistory();
+}
+
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
