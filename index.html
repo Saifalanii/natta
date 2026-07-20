@@ -104,11 +104,14 @@
   li .dur{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.1rem;font-variant-numeric:tabular-nums}
   #empty{color:var(--ink-dim);font-size:.95rem;padding:6px 2px}
   #toast{
-    position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);
+    position:fixed;left:50%;bottom:calc(max(24px,env(safe-area-inset-bottom)) + 56px);
+    transform:translateX(-50%) translateY(20px);
     background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 18px;
-    font-size:.95rem;transition:transform .3s ease;z-index:5;max-width:90vw;text-align:center;
+    font-size:.9rem;line-height:1.3;transition:opacity .3s ease, transform .3s ease;
+    opacity:0;pointer-events:none;z-index:5;max-width:min(90vw,340px);text-align:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  #toast.show{transform:translateX(-50%) translateY(0)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -163,8 +166,14 @@ function fmtDur(min){
   return h>0 ? `${h} h ${m} min` : `${m} min`;
 }
 function toast(msg){
-  const t = $("toast"); t.textContent = msg; t.classList.add("show");
-  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), 2600);
+  const t = $("toast");
+  clearTimeout(t._h);
+  t.classList.remove("show");
+  // force reflow so re-triggering the same message still re-animates
+  void t.offsetWidth;
+  t.textContent = msg;
+  t.classList.add("show");
+  t._h = setTimeout(()=>t.classList.remove("show"), 2400);
 }
 
 function render(){
@@ -234,7 +243,7 @@ $("moon").addEventListener("click", async ()=>{
     await api(wasSleeping ? "stop" : "start");
     if(wasSleeping) refreshHistory();
   }catch(e){
-    toast("Kunde inte nå backend – kontrollera anslutningen");
+    toast("Kunde inte nå backend");
     refreshStatus();
   }
 });
