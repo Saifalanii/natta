@@ -27,15 +27,15 @@
     --radius:22px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-  html,body{height:100%}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%;overflow:hidden}
+  html,body{height:100dvh}
   body{
     background:var(--night);
     color:var(--ink);
     font-family:'Nunito Sans',system-ui,sans-serif;
     display:flex;flex-direction:column;align-items:center;
-    padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
-    overflow-x:hidden;
+    padding:max(14px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));
+    overflow:hidden;
     background:radial-gradient(120% 90% at 50% -10%, #1A1F3E 0%, var(--night) 60%);
   }
   /* stars */
@@ -44,7 +44,7 @@
   body.sleeping .star{animation:twinkle 4s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.7}}
 
-  header{z-index:1;text-align:center;margin-top:12px}
+  header{z-index:1;text-align:center;margin-top:8px;flex-shrink:0}
   h1{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.35rem;letter-spacing:.02em;color:var(--ink-dim)}
   #status-word{
     font-family:'Baloo 2',sans-serif;font-weight:700;font-size:2rem;margin-top:2px;
@@ -94,7 +94,7 @@
   body.sleeping #hint{color:var(--moon)}
 
   /* history */
-  section{z-index:1;width:100%;max-width:420px;margin-top:28px}
+  section{z-index:1;width:100%;max-width:420px;margin-top:20px;flex-shrink:0;overflow-y:auto;max-height:26vh}
   h2{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink-dim);margin-bottom:10px}
   ul{list-style:none;display:flex;flex-direction:column;gap:8px}
   li{
@@ -143,7 +143,7 @@
 <script>
 /* ============ KONFIG ============ */
 /* Klistra in din Apps Script Web App-URL här (slutar på /exec) */
-const API = "https://script.google.com/macros/s/AKfycbwha00OkkWZTbmOAS32cDh_EVRaR8-O2z8a4UxWhAFD-AoEFKskVefHHjgBc8jJfK3d/exec";
+const API = "https://script.google.com/macros/s/AKfycbwtLguXdnGawhd-pXVkFbXXCMI7aHQ9B4SyyEYZ3EV8dQ92LDyfHlggQ8eUXthWFIb8/exec";
 /* ================================ */
 
 const $ = id => document.getElementById(id);
